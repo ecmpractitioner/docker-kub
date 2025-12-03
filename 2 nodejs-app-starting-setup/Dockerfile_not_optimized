@@ -5,17 +5,13 @@ FROM node:14-alpine
 # All our cmmands and actions will be done in the working directory we set here
 WORKDIR /app
 
-# To optimize the image build process, first copy only the package.json and package-lock.json files
-COPY package*.json /app/
-
-# To further optimize, install dependencies before copying the rest of the application files
-
-RUN npm install
-
 # Next tell the docker which files from our local machine we want to copy into the image
 # Here we copy all files from the current directory into the /app directory in the image
 
 COPY . /app
+
+# Since this is a node application, we need to install the dependencies
+RUN npm install
 
 # Next we need to expose the port on which our application will run inside the container
 # This will allow us to map this port to a port on the host machine when we run a container based on this image
