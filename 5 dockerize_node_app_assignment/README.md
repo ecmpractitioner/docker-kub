@@ -291,8 +291,7 @@ Add unit/integration tests with Jest/Mocha and include in CI.
 
 ## License
 
-Specify a license (e.g., MIT) or keep proprietary. Add LICENSE file if required.
+FREE
 
 ---
 
-If you want, provide the repository files (Dockerfile, docker-compose.yml, k8s manifests, .env.example, and src/index.js) and this README will be updated to match exact content and ports.
