@@ -1,0 +1,1 @@
+print("This is a placeholder file to move content from and into Docker container.")
