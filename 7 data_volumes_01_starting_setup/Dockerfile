@@ -1,6 +1,7 @@
 
 FROM node:18-alpine
 
+
 # Set working directory
 WORKDIR /app
 
@@ -13,8 +14,20 @@ RUN npm install
 # Copy application code
 COPY . .
 
+#build time arguments
+ARG DEFAULT_PORT=80
+
 # Expose port
-EXPOSE 80
+#EXPOSE 80
+
+# there is another way to expose ports using ENV instruction
+ENV PORT $DEFAULT_PORT
+
+# nowe cn expoed port can be accessed using process.env.PORT in the application code
+EXPOSE $PORT
+
+# then with docker run, you cn set the env s shown below
+# docker run -d -p 3000:8000  --env PORT=8000 --name data_volumes_01 -v feedback:/app/feedback -v "D:\learn\docker&kub\learning\docker-kub\7 data_volumes_01_starting_setup:/app" -v /app/node_modules data_volumes_01:env
 
 # Define a volume for persistent feedback storage
 # The feedback folder will be stored outside the container on the host machine
@@ -38,5 +51,3 @@ VOLUME ["/app/feedback"]
 
 # Start the Node.js application server
 CMD ["node","server.js"]
-
-

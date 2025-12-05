@@ -48,5 +48,11 @@ app.post('/create', async (req, res) => {
   });
 });
 
-app.listen(80);
-console.log('Server is running on port 80');
+// this is how we hardcode port earlier
+//app.listen(80);
+
+//we can use env to expose port dynamically
+const PORT = process.env.PORT || 80;
+app.listen(PORT);
+
+console.log('Server is running on port ' + PORT);
