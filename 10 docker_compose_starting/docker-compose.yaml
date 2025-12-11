@@ -1,0 +1,82 @@
+# Docker Compose file version
+#version: "5.0"
+
+# when we use docker compose, we don't have to specify the network configuration because docker compose automatically creates a default network for the services to communicate with each other.
+# when we are using docker compose, we do noot need to usee --rm and -d flags because docker compose handles that automatically.
+# Define the services
+services:
+  #the childs of the services are your containers. In our project, we have three containers as follows:
+  backend:
+    #image: node #if we already have an image built, we can specify the image name here.
+    build: # if we want to build, then we need specify the Dockerfile location.
+      context: ./backend #specifies the build context, which is the directory containing the Dockerfile and other files needed for building the image.
+      dockerfile: Dockerfile #specifies the name of the Dockerfile to use for building the image.
+      #args: # if we use arguments in the Dockerfile, we can pass the values here.
+        #NODE_VERSION: 18 # this is an example.
+    #Now we will specify the ports to be exposed from the container to the host machine.
+    ports:
+      - "80:80" # the first part is the host port and the second part is the container port.
+    volumes:
+      - logs:/app/logs # we are adding a named volume called logs to the /app/logs directory inside the container.
+      # in docker run command, we need full path of the file on the host machine to be used with bind mount.
+      # here we can use relative path.
+      # bind mounts need not be listed under volumes at the bottom of the file.
+      - ./backend:/app # we are using bind mount to mount the backend directory from the host machine to the /app directory inside the container.
+      # adding anonymous volume to avoid overwriting node_modules folder in the container with an empty folder from the host machine.
+      # like bind mounts, anonymous volumes need not be listed under volumes at the bottom of the file.
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    # now we will add depends_on to specify the dependency between the services.
+    # defining this will help docker compose to start the services in the correct order.
+    depends_on:
+      - mongodb # this indicates that the backend service depends on the mongodb service.
+    container_name: "backend" #specifies the name of the container.
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true # keep the container running even if there is no terminal attached.
+    tty: true # allocate a pseudo-TTY to the container.
+    container_name: "frontend"
+    depends_on:
+      - backend # this indicates that the frontend service depends on the backend service.
+    
+
+  mongodb:
+    #this is where we define the image we want to use for our mongodb container and other configurations for the container.
+    # with docker compose, we don't need add --rm flag to remove the container after stopping it.
+    # also we don't need to add -d flag to run the container in detached mode because by default, docker compose runs containers in detached mode.
+    image: "mongo" #specifies the image to use for the container
+    container_name: "mongodb" #specifies the name of the container
+    volumes: # used to add volumnes to the container.
+      #to add a volumne, we begin with a hyphen followed by the source path on the host machine, a colon, and then the destination path inside the container.
+      - data:/data/db #we add a volume name and then the path inside the container where we want to mount the volume.
+    # next we will add environment variables to the container.
+    #environment:
+      # we can specify the env variables in two ways
+      # first way is to specify each variable on a new line as key-value pairs.
+      #MONGO_INITDB_ROOT_USERNAME:manju
+      #MONGO_INITDB_ROOT_PASSWORD:secret
+      # second way is to specify the variables as a list of strings in the format KEY=VALUE.
+      #- MONGO_INITDB_ROOT_PASSWORD=manju
+      # another way is to use an env file to specify the env variables.
+      # we can create say mongo.env file inside a env directory and reference it here.
+    env_file:
+      - ./env/mongo.env
+      
+# when we use a named volumes, we need list them under the services as shown below:
+# anonymous and bind volumes do not need to be listed here.
+volumes:
+  data: # if the we use the same volume name in multiple services, they will share the same volume.
+  logs: # this is the named volume for logs used in the backend service.
+
+# how to use the docker compose file:
+# open the terminal and navigate to the directory where docker-compose.yaml is present
+# run the command: docker compose up -d
+# this will start all the services defined in the docker-compose.yaml file in detached mode.
